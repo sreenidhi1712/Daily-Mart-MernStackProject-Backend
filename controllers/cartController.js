@@ -1,35 +1,22 @@
 import userModel from "../models/userModel.js";
 
-
-// const addToCart = async (req, res) => {
-//   try {
-//     let userData = await userModel.findById(req.body.userId);
-//     let cartData = userData.cartData || [];
-//     const newCartItems = req.body.cart;
-
-//     // Extract existing item IDs
-//     const existingItemIds = cartData.map(item => item.item);
-
-//     // Filter out new items that already exist in cartData
-//     const filteredNewItems = newCartItems.filter(item => !existingItemIds.includes(item.item));
-
-//     // Push only the filtered new items to the existing cart data
-//     cartData.push(...filteredNewItems);
-
-//     await userModel.findByIdAndUpdate(req.body.userId, { cartData });
-//     res.json({ success: true, message: "Added to cart" });
-//   } catch (error) {
-//     console.log(error);
-//     res.status(500).json({ success: false, message: "Error!" });
-//   }
-// };
-
 // Add items to user cart
 const addToCart = async (req, res) => {
   try {
     let userData = await userModel.findById(req.body.userId);
-    const cartData = req.body.cart;
-    await userModel.findByIdAndUpdate(userData, { cartData });
+    let cartData = userData.cartData || [];
+    const newCartItems = req.body.cart;
+
+    // Extract existing item IDs
+    const existingItemIds = cartData.map(item => item.item);
+
+    // Filter out new items that already exist in cartData
+    const filteredNewItems = newCartItems.filter(item => !existingItemIds.includes(item.item));
+
+    // Push only the filtered new items to the existing cart data
+    cartData.push(...filteredNewItems);
+
+    await userModel.findByIdAndUpdate(req.body.userId, { cartData });
     res.json({ success: true, message: "Added to cart" });
   } catch (error) {
     console.log(error);
@@ -53,9 +40,10 @@ const removeFromCart = async (req, res) => {
     res.json({ success: true, message: "Removed from cart" });
   } catch (error) {
     console.log(error);
-    res.json({ success: false, message: "Error!" });
+    res.status(500).json({ success: false, message: "Error!" });
   }
 };
+
 // Fetch user cart data
 const getCart = async (req, res) => {
   try {
@@ -64,11 +52,11 @@ const getCart = async (req, res) => {
     res.json({ success: true, cartData });
   } catch (error) {
     console.log(error);
-    res.json({ success: false, message: "Error 123!" });
+    res.status(500).json({ success: false, message: "Error!" });
   }
 };
 
-// Update quantity of an item in user cart
+// Increment quantity of an item in user cart
 const increment = async (req, res) => {
   try {
     let userData = await userModel.findById(req.body.userId);
@@ -88,6 +76,8 @@ const increment = async (req, res) => {
     res.status(500).json({ success: false, message: "Error!" });
   }
 };
+
+// Decrement quantity of an item in user cart
 const decrement = async (req, res) => {
   try {
     let userData = await userModel.findById(req.body.userId);
@@ -96,9 +86,13 @@ const decrement = async (req, res) => {
     const itemIndex = cartData.findIndex(cartItem => cartItem.item === req.body.itemId);
 
     if (itemIndex !== -1) {
-      cartData[itemIndex].quantity -= 1;
-      await userModel.findByIdAndUpdate(req.body.userId, { cartData });
-      res.json({ success: true, message: "Quantity updated" });
+      if (cartData[itemIndex].quantity > 1) {
+        cartData[itemIndex].quantity -= 1;
+        await userModel.findByIdAndUpdate(req.body.userId, { cartData });
+        res.json({ success: true, message: "Quantity updated" });
+      } else {
+        res.json({ success: false, message: "Quantity cannot be less than 1" });
+      }
     } else {
       res.json({ success: false, message: "Item not found in cart" });
     }
@@ -111,10 +105,7 @@ const decrement = async (req, res) => {
 // Clear all items from user cart
 const clearCart = async (req, res) => {
   try {
-    let userData = await userModel.findById(req.body.userId);
-    userData.cartData = [];
-
-    await userModel.findByIdAndUpdate(req.body.userId, { cartData: userData.cartData });
+    await userModel.findByIdAndUpdate(req.body.userId, { cartData: [] });
     res.json({ success: true, message: "Cart cleared" });
   } catch (error) {
     console.log(error);
@@ -122,4 +113,4 @@ const clearCart = async (req, res) => {
   }
 };
 
-export { addToCart, removeFromCart, getCart ,increment,decrement,clearCart};
+export { addToCart, removeFromCart, getCart, increment, decrement, clearCart };
