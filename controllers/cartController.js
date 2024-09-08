@@ -91,7 +91,9 @@ const decrement = async (req, res) => {
         await userModel.findByIdAndUpdate(req.body.userId, { cartData });
         res.json({ success: true, message: "Quantity updated" });
       } else {
-        res.json({ success: false, message: "Quantity cannot be less than 1" });
+        let filteredData = cartData.filter(items => items.item !== req.body.itemId);
+        await userModel.findByIdAndUpdate(req.body.userId, { filteredData });
+        res.json({ success: true, message: "Quantity updated" });
       }
     } else {
       res.json({ success: false, message: "Item not found in cart" });
