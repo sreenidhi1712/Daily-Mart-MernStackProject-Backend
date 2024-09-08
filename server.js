@@ -12,8 +12,13 @@ import favouriteRouter from "./routes/favouriteRoute.js";
 const app = express();
 const port = process.env.PORT || 8000;
 
+const corsOptions = {
+  origin: '*', // Allow all origins
+  methods: ['GET', 'POST'], // Allow only GET and POST requests
+};
+
 //middlewaree
-app.use(cors());
+app.use(cors(corsOptions));
 app.use(express.json());
 
 //DB connection
