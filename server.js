@@ -14,8 +14,10 @@ const port = process.env.PORT || 8000;
 
 const corsOptions = {
   origin: '*', // Allow all origins
-  methods: ['GET', 'POST'], // Allow only GET and POST requests
+  methods: ['GET', 'POST', 'PUT', 'DELETE'], // Allow GET, POST, PUT, DELETE requests
+  allowedHeaders: '*', // Allow all headers
 };
+
 
 //middlewaree
 app.use(cors(corsOptions));
