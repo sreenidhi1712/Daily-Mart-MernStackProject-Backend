@@ -90,9 +90,9 @@ const decrement = async (req, res) => {
         cartData[itemIndex].quantity -= 1;
         await userModel.findByIdAndUpdate(req.body.userId, { cartData });
         res.json({ success: true, message: "Quantity updated" });
-      } else {
-        let filteredData = cartData.filter(items => items.item !== req.body.itemId);
-        await userModel.findByIdAndUpdate(req.body.userId, { filteredData });
+      } else if (cartData[itemIndex].quantity === 1) {
+        cartData.splice(itemIndex, 1);
+        await userModel.findByIdAndUpdate(req.body.userId, { cartData });
         res.json({ success: true, message: "Quantity updated" });
       }
     } else {
